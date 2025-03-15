@@ -8,7 +8,7 @@ class Program
     {
         // Define the SignalR server URL
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl("wss://localhost:44311/com-hub")
+            .WithUrl("wss://api.dev-sandbox.dev/com-hub")
             .WithAutomaticReconnect() // Reconnect on disconnect
             .Build();
 
@@ -24,7 +24,7 @@ class Program
             await hubConnection.StartAsync();
             Console.WriteLine("Connected to SignalR!");
 
-            await hubConnection.InvokeAsync("JoinGroup", "api_3y><pxotI8", "channel_Fa8A3og4IucY");
+            await hubConnection.InvokeAsync("JoinGroup", "api_\\|^T8.%1n5", "channel_DGDrOB7OfYUJ");
             Console.WriteLine("Joined the 'Developers' group.");
         }
         catch (Exception ex)
@@ -33,7 +33,7 @@ class Program
         }
 
         // Send a message to the server
-        await hubConnection.InvokeAsync("SendMessage", "Hello from .NET!", "api_3y><pxotI8", "channel_Fa8A3og4IucY");
+        await hubConnection.InvokeAsync("SendMessage", "Hello from .NET!", "api_\\|^T8.%1n5", "channel_DGDrOB7OfYUJ");
 
         // Keep the connection alive
         Console.WriteLine("Press any key to exit...");
