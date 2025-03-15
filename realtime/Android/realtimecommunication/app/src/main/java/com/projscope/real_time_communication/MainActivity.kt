@@ -19,7 +19,7 @@ class MainActivity : AppCompatActivity() {
         val stopButton: Button = findViewById(R.id.btn_stop)
 
         startButton.setOnClickListener {
-            signalRService.startConnection() // <----
+            signalRService.startConnection(baseContext) // <----
         }
 
         stopButton.setOnClickListener {
