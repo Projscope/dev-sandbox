@@ -16,7 +16,11 @@ class SignalRService {
         .create("wss://api.dev-sandbox.dev/com-hub")
         .build()
 
+    private val api_key = "api_;4+ospGZs]"
+    private val channelId = "channel_LQZjp98azInh"
+
     val connectionStatus: BehaviorSubject<Boolean> = BehaviorSubject.createDefault(false)
+    val receivedMessages: PublishSubject<String> = PublishSubject.create()
 
     @SuppressLint("CheckResult")
     fun startConnection(baseContext: Context) {
@@ -27,11 +31,11 @@ class SignalRService {
 
         hubConnection.start()
             .retryWhen { errors ->
-                errors.take(3).delay(3, TimeUnit.SECONDS) // Retry up to 3 times
+                errors.take(3).delay(3, TimeUnit.SECONDS)
             }
             .subscribe({
                 Log.d("SignalR", "Connected successfully!")
-                hubConnection.invoke("JoinGroup", "api_;4+ospGZs]", "channel_LQZjp98azInh")
+                hubConnection.invoke("JoinGroup", api_key, channelId)
                 Log.d("SignalR", "Joining group")
                 connectionStatus.onNext(true)
             }, { error ->
@@ -40,12 +44,9 @@ class SignalRService {
             })
 
         hubConnection.on("ReceiveMessage", { message: String ->
-            Log.d("SignalR", "Received: $message | Thread: ${Thread.currentThread().name}")
-
-            notificationHelper.showHeadsUpNotification(
-                "Realtime message",
-                message
-            )
+            Log.d("SignalR", "Received: $message")
+            receivedMessages.onNext(message) // Pass message to the UI via the subject
+            notificationHelper.showHeadsUpNotification("Realtime message", message)
         }, String::class.java)
     }
 
@@ -54,7 +55,6 @@ class SignalRService {
             .subscribe({
                 Log.d("SignalR", "Disconnected successfully")
 
-                // Wait for subscribers before sending onNext(false)
                 var attempts = 0
                 while (!connectionStatus.hasObservers() && attempts < 10) {
                     Thread.sleep(100) // Wait a bit
@@ -73,7 +73,7 @@ class SignalRService {
 
     fun sendMessage(user: String, message: String) {
         if (hubConnection.connectionState == HubConnectionState.CONNECTED) {
-            hubConnection.invoke("SendMessage", user, message)
+            hubConnection.invoke("SendMessage", message, api_key, channelId)
         } else {
             Log.e("SignalR", "Cannot send message, not connected!")
         }
